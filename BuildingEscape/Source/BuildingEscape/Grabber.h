@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Runtime/Engine/Classes/Engine/World.h"
 #include "Grabber.generated.h"
 
 
