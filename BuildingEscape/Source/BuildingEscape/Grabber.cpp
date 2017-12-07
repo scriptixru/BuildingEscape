@@ -12,7 +12,6 @@ UGrabber::UGrabber()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
 }
 
 
@@ -69,17 +68,31 @@ void UGrabber::Grab()
 	UE_LOG(LogTemp, Warning, TEXT("Grab pressed"));
 
 	/// LINE TRACE and see if we reach any actors with physics body collision channel set
-	GetFirstPhisycsBodyInReach();
+	auto HitResult = GetFirstPhisycsBodyInReach();
+	auto ComponentToGrab = HitResult.GetComponent();
+	auto ActorHit = HitResult.GetActor();
 
 	///If we hit something  then attach a physics handle
-	//TODO attach physics handle
+	if (ActorHit)
+	{
+		// attach physics handle
+		PhysicsHandle->GrabComponent(
+			ComponentToGrab,
+			NAME_None,
+			ComponentToGrab->GetOwner()->GetActorLocation(),
+			true
+
+		);
+	}
+
 
 }
 
 void UGrabber::Released()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grab released"));
-	//TODO release physics handle 
+	PhysicsHandle->ReleaseComponent();
+	
 }
 
 // Called every frame
@@ -88,7 +101,26 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// if the physics handle is attached 
+	if (PhysicsHandle->GrabbedComponent)
+	{
+		/// Get player view point this tick
+		FVector PlayerViewPointLocation;
+		FRotator PlayerViewPointRotation;
+		GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
+			OUT PlayerViewPointLocation,
+			OUT PlayerViewPointRotation
+		);
+		// Log out to test 
+		//UE_LOG(LogTemp, Warning, TEXT("Location: %s, Rotation %s"),
+		//	*PlayerViewPointLocation.ToString(),
+		//	*PlayerViewPointRotation.ToString());
+
+		FVector LineTraceEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach;
+
 		// move the object that we're holding
+		PhysicsHandle->SetTargetLocation(LineTraceEnd);
+	}
+		
 
 
 
@@ -141,5 +173,5 @@ const FHitResult UGrabber::GetFirstPhisycsBodyInReach()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Line trace hit: %s"), *(AActorHit->GetName()))
 	}
-	return FHitResult();
+	return Hit;
 }
