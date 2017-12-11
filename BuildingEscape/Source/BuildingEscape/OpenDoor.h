@@ -9,7 +9,7 @@
 #include "OpenDoor.generated.h"
 
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOpenRequest);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BUILDINGESCAPE_API UOpenDoor : public UActorComponent
@@ -20,12 +20,17 @@ public:
 	// Sets default values for this component's properties
 	UOpenDoor();
 
+
+	void OpenDoor();
+	void CloseDoor();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnOpenRequest 	OnOpenRequest;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	void OpenDoor();
-	void CloseDoor();
 
 public:	
 	// Called every frame
